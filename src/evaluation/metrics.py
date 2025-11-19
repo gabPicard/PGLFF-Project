@@ -17,7 +17,7 @@ def annualized_volatility(series: pd.Series, freq: int = 252) -> float:
 
 def sharpe_ratio(series: pd.Series, risk_free: float = 0.0, freq: int = 252) -> float:
     rets = daily_returns(series)
-    if rets.std() == 0:
+    if rets.std().item() == 0:
         return np.nan
 
     mean_ret = rets.mean() * freq
