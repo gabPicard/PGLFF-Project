@@ -1,0 +1,43 @@
+# --- PYTHON ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+*.log
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Installer output
+build/
+dist/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# --- STREAMLIT ---
+.streamlit/
+
+# --- VS CODE ---
+.vscode/
+*.code-workspace
+
+# --- USER SPECIFIC / SYSTEM ---
+.DS_Store
+Thumbs.db
+
+# --- WINDOWS CRAP ---
+desktop.ini
+
+# --- PROJECT ---
+data/raw/
+data/processed/
+data/reports/
+
+# Ignore secrets (if you add API keys)
+config.yaml
