@@ -145,7 +145,7 @@ def run(config=None):
 
     valid_tickers = list(price_df.columns)
 
-    # ---- 2) Portfolio weights ----
+    # ---- 2) Portfolio allocation ----
     st.subheader("2) Portfolio allocation")
 
     cols = st.columns(len(valid_tickers))
@@ -169,8 +169,30 @@ def run(config=None):
 
     st.write("Normalized weights (valid tickers only):", weights.round(3).to_dict())
 
-    # ---- 3) Market data ----
-    st.subheader("3) Market data")
+    # ---- 3) Strategy settings ----
+    st.subheader("3) Strategy settings")
+
+    strategy_label = st.selectbox(
+        "Rebalancing frequency",
+        [
+            "Daily (constant weights)",
+            "Monthly rebalancing",
+            "Quarterly rebalancing",
+            "None (buy and hold)",
+        ],
+        index=0,
+    )
+
+    strategy_map = {
+        "Daily (constant weights)": "daily",
+        "Monthly rebalancing": "monthly",
+        "Quarterly rebalancing": "quarterly",
+        "None (buy and hold)": "none",
+    }
+    rebalancing_freq = strategy_map[strategy_label]
+
+    # ---- 4) Market data ----
+    st.subheader("4) Market data")
 
     price_df_for_plot = price_df.copy()
     if isinstance(price_df_for_plot.columns, pd.MultiIndex):
@@ -183,12 +205,20 @@ def run(config=None):
 
     st.line_chart(price_df_for_plot)
 
-    # ---- 4) Portfolio performance ----
-    st.subheader("4) Portfolio performance")
+    # ---- 5) Portfolio performance ----
+    st.subheader("5) Portfolio performance")
 
     returns_df = compute_returns(price_df)
 
-    portfolio_returns = compute_portfolio_returns(returns_df, weights)
+    # Try to use rebalancing parameter if backend supports it,
+    # otherwise fall back to the old signature.
+    try:
+        portfolio_returns = compute_portfolio_returns(
+            returns_df, weights, rebalancing=rebalancing_freq
+        )
+    except TypeError:
+        portfolio_returns = compute_portfolio_returns(returns_df, weights)
+
     cum_value = compute_cumulative_value(portfolio_returns, initial_value=initial_value)
     stats_df = portfolio_stats(portfolio_returns, periods_per_year=periods_per_year)
 
@@ -205,8 +235,46 @@ def run(config=None):
         )
     )
 
-    # ---- 5) Correlation matrix ----
-    st.subheader("5) Correlation between assets")
+    # ---- 6) Diversification effect ----
+    st.subheader("6) Diversification effect")
+
+    # Annualized volatility of each asset
+    asset_vol_annual = returns_df.std() * (periods_per_year ** 0.5)
+
+    # Align weights with returns_df columns
+    if isinstance(weights, pd.Series):
+        w_aligned = weights.reindex(returns_df.columns).fillna(0.0)
+    else:
+        w_aligned = pd.Series(weights, index=returns_df.columns).fillna(0.0)
+
+    # Normalize weights (safety)
+    if w_aligned.sum() == 0:
+        w_aligned = pd.Series(1.0 / len(returns_df.columns), index=returns_df.columns)
+    else:
+        w_aligned = w_aligned / w_aligned.sum()
+
+    # Weighted average asset volatility (annualized, decimal)
+    weighted_avg_vol = float((w_aligned * asset_vol_annual).sum())
+
+    # Portfolio annual volatility (decimal)
+    portfolio_vol = float(portfolio_returns.std() * (periods_per_year ** 0.5))
+
+    # Volatility reduction due to diversification (in %)
+    if weighted_avg_vol > 0:
+        vol_reduction_pct = (weighted_avg_vol - portfolio_vol) / weighted_avg_vol * 100.0
+    else:
+        vol_reduction_pct = 0.0
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Weighted avg asset vol (%)", f"{weighted_avg_vol * 100:.2f}")
+    with col2:
+        st.metric("Portfolio vol (%)", f"{portfolio_vol * 100:.2f}")
+    with col3:
+        st.metric("Vol reduction (%)", f"{vol_reduction_pct:.2f}")
+
+    # ---- 7) Correlation matrix ----
+    st.subheader("7) Correlation between assets")
 
     corr_df = compute_correlation_matrix(returns_df)
     st.dataframe(corr_df.style.background_gradient(cmap="coolwarm"))
