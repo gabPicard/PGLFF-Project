@@ -1,14 +1,14 @@
 import streamlit as st
 import pandas as pd
 
-from components.widgets import (
+from app.components.widgets import (
     select_asset,
     select_period,
     select_interval,
     select_strategy,
     momentum_period_slider,
 )
-from components.charts import price_and_strategy_chart
+from app.components.charts import price_and_strategy_chart
 
 from src.data.fetch_yf import get_history
 from src.strategies.buy_and_hold import run_buy_and_hold
