@@ -147,6 +147,32 @@ def run(config=None):
 
     valid_tickers = list(price_df.columns)
 
+    st.markdown("###  Live Market Data")
+    
+    # Calculate daily percentage change for visual indicators
+    if len(price_df) > 1:
+        prev_prices = price_df.iloc[-2]
+        last_prices = price_df.iloc[-1]
+        pct_change = ((last_prices - prev_prices) / prev_prices) * 100
+    else:
+        # Fallback if not enough data
+        pct_change = pd.Series(0, index=valid_tickers)
+
+    cols = st.columns(len(valid_tickers))
+    for col, t in zip(cols, valid_tickers):
+        if t in price_df:
+            curr_price = price_df[t].iloc[-1]
+            delta_val = pct_change[t]
+            # Display price with green/red indicator
+            col.metric(
+                label=t, 
+                value=f"{curr_price:.2f}", 
+                delta=f"{delta_val:.2f} %"
+            )
+        else:
+            col.metric(t, "N/A")
+    st.divider()
+
     # ---- 2) Portfolio allocation ----
     st.subheader("2) Portfolio allocation")
 
@@ -224,7 +250,21 @@ def run(config=None):
     cum_value = compute_cumulative_value(portfolio_returns, initial_value=initial_value)
     stats_df = portfolio_stats(portfolio_returns, periods_per_year=periods_per_year)
 
-    # --- Performance Comparison Chart (Base 100) ---
+    curr_pf = cum_value.iloc[-1]
+    if len(cum_value) > 1:
+        prev_pf = cum_value.iloc[-2]
+        pf_delta = ((curr_pf - prev_pf) / prev_pf) * 100
+    else:
+        pf_delta = 0.0
+
+    st.metric(
+        label=" Portfolio Value (Current)", 
+        value=f"{curr_pf:.2f}", 
+        delta=f"{pf_delta:.2f} %"
+    )
+    # --- Base 100 Comparison Chart (Portfolio vs Assets) ---
+    st.markdown("####  Performance Comparison (Base 100)")
+
     # Normalize asset prices to start at 100 for comparison
     normalized_assets = (price_df / price_df.iloc[0]) * 100
 
@@ -237,6 +277,14 @@ def run(config=None):
 
     st.line_chart(chart_data)
 
+    # --- Calculate Max Drawdown ---
+    rolling_max = cum_value.cummax()
+    drawdown = (cum_value / rolling_max) - 1.0
+    max_drawdown = drawdown.min()
+
+    # Add Max Drawdown to the stats table
+    stats_df["Max Drawdown (%)"] = max_drawdown * 100
+
     st.markdown("Portfolio statistics")
     st.dataframe(
         stats_df.style.format(
@@ -244,6 +292,7 @@ def run(config=None):
                 "Annual return (%)": "{:.2f}",
                 "Annual volatility (%)": "{:.2f}",
                 "Sharpe (approx)": "{:.2f}",
+                "Max Drawdown (%)": "{:.2f}",
             }
         )
     )
