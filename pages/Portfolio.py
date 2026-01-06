@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-
+from datetime import datetime
 import pandas as pd
 import streamlit as st
 
@@ -8,7 +8,7 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
-
+from streamlit_autorefresh import st_autorefresh
 from src.data.fetch_yf import get_history
 from src.portfolio.weights import equal_weights, normalize_weights
 from src.portfolio.portfolio_engine import (
@@ -78,7 +78,9 @@ def compute_returns(price_df):
 
 def run(config=None):
     """Main Streamlit page for the multi-asset portfolio (Quant B)."""
-
+    st_autorefresh(interval=300000, key="data_refresher")
+    #refresh every 5 minutes
+    st.toast(f"Data updated at {datetime.now().strftime('%H:%M:%S')}", icon="🔄")
     st.title("Multi-Asset Portfolio")
 
     # Default values (can be overridden by config.yaml if you want)
@@ -284,5 +286,5 @@ def run(config=None):
 
 
 if __name__ == "__main__":
-    # Run with:  streamlit run app/Portfolio.py
+    # Run with:  streamlit run pages/Portfolio.py
     run()
