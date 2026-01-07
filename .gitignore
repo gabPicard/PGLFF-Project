@@ -39,5 +39,13 @@ data/raw/
 data/processed/
 data/reports/
 
+# Daily report outputs and logs
+reports/
+logs/
+*.log
+
+# Keep config.yaml in repo but ignore user-specific overrides
+config.local.yaml
+
 # Ignore secrets (if you add API keys)
-config.yaml
+# config.yaml

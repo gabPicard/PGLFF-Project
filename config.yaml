@@ -1,0 +1,18 @@
+report_assets:
+- AAPL
+- MSFT
+- GLD
+- BTC-USD
+- TSLA
+- NVDA
+portfolio_assets:
+- AAPL
+- MSFT
+- GLD
+- GOOGL
+default_tickers:
+- AAPL
+- MSFT
+- GLD
+period: 3mo
+interval: 1d

@@ -1,0 +1,22 @@
+# Daily Report Cron Job Configuration
+# This file contains the cron job entry for generating daily reports at 8:00 PM
+# 
+# To install this cron job:
+#   1. Run: bash scripts/setup_cron.sh
+#   OR
+#   2. Manually add this line to your crontab (run: crontab -e)
+#
+# Cron format: minute hour day month weekday command
+# 0 20 * * * = Every day at 8:00 PM (20:00)
+
+# Generate daily report at 8:00 PM every day
+0 20 * * * cd /path/to/PGLFF---Project && /usr/bin/python3 scripts/generate_daily_report.py >> logs/cron_daily_report.log 2>&1
+
+# Alternative times (uncomment to use):
+# 0 9 * * * = Every day at 9:00 AM
+# 0 12 * * * = Every day at 12:00 PM (noon)
+# 0 18 * * * = Every day at 6:00 PM
+# 0 0 * * * = Every day at midnight
+
+# For testing: run every 5 minutes (comment out after testing)
+# */5 * * * * cd /path/to/PGLFF---Project && /usr/bin/python3 scripts/generate_daily_report.py >> logs/cron_daily_report.log 2>&1

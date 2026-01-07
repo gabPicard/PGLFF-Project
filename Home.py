@@ -23,6 +23,12 @@ st.page_link(
     icon="🧮"
 )
 
+st.page_link(
+    "pages/Settings.py",
+    label="Settings & Configuration",
+    icon="⚙️"
+)
+
 st.markdown("---")
 st.header("Project by")
 
