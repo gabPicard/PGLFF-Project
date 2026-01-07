@@ -28,8 +28,7 @@ count = st_autorefresh(interval=300000, limit=None, key="single_asset_refresh")
 
 st.title("Analysis of a single asset (Quant A)")
 
-if count > 0:
-    st.info(f"Data updated - {datetime.now().strftime('%H:%M:%S')}")
+st.toast(f"Data updated - {datetime.now().strftime('%H:%M:%S')}")
 
 with st.sidebar:
     st.header("Parameters")
