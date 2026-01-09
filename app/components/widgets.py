@@ -17,7 +17,7 @@ def select_period():
 def select_interval():
     return st.selectbox(
         "Interval:",
-        ["1d", "1h", "30m"],
+        ["1d", "1wk"],
         index=0,
     )
 

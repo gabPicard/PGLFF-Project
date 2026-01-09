@@ -20,7 +20,6 @@ from src.evaluation.backtesting import backtest
 
 st.set_page_config(
     page_title="Analysis of a single asset (Quant A)",
-    page_icon="📈",
     layout="wide",
 )
 
@@ -77,7 +76,7 @@ else:
 
 results = backtest(strategy_series)
 
-st.subheader("📊 Performance Indicators")
+st.subheader("Performance Indicators")
 
 m1, m2, m3, m4 = st.columns(4)
 
@@ -98,7 +97,7 @@ m4.metric(
     f"{results['max_drawdown']*100:,.2f} %",
 )
 
-st.subheader("📉 Price and Strategy")
+st.subheader("Price and Strategy")
 
 fig = price_and_strategy_chart(df, strategy_series, title=f"{ticker} - {strategy_name}")
 st.plotly_chart(fig, use_container_width=True)
